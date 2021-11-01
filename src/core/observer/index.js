@@ -34,17 +34,21 @@ export function toggleObserving (value: boolean) {
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
  */
+
 export class Observer {
   value: any;
   dep: Dep;
   vmCount: number; // number of vms that have this object as root $data
 
   constructor (value: any) {
+    // value为需要监听的data属性
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    //在value上添加一个ob属性，代表经过响应式处理，指向observer实例
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
+      // 处理数组响应式,将当前数组的proto设置为arraymethods，以免污染Array.prototype
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -52,6 +56,7 @@ export class Observer {
       }
       this.observeArray(value)
     } else {
+      //处理对象响应式
       this.walk(value)
     }
   }
@@ -107,11 +112,15 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
  */
+
+// 响应式处理入口
 export function observe (value: any, asRootData: ?boolean): Observer | void {
+  // 判断传入的value是否是对象或者vnode类型，不是就直接结束
   if (!isObject(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
+  // 判断value上是否已经有ob,如果是，就代表已经经过响应式处理，赋值给ob然后返回
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -121,6 +130,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
+    // 新建一个observer实例
     ob = new Observer(value)
   }
   if (asRootData && ob) {
@@ -139,27 +149,32 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  //新建一个dep，每一个key代表一个dep
   const dep = new Dep()
-
+  // 获取属性描述符
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
   }
 
   // cater for pre-defined getter/setters
+  // 从属性描述符中获取getter和setter
   const getter = property && property.get
   const setter = property && property.set
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
-
+  // 通过递归处理value为对象的情况(处理嵌套对象)
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
+    // 拦截对obj[key]的访问
     enumerable: true,
     configurable: true,
+    // 拦截obj.key的读取
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
+        // 如果dep.target存在，则收集依赖
         dep.depend()
         if (childOb) {
           childOb.dep.depend()

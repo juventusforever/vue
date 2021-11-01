@@ -1,3 +1,11 @@
+/*
+ * 作者 WuJielin
+ * 最后修改 WuJielin
+ * 创建时间 2021-10-13 17:39:23
+ * 最后修改时间 2021-11-01 11:06:03
+ * 说明 
+ * 文件路径 \Mase:\WJL\Project\vuejs\vue\src\core\observer\dep.js
+ */
 /* @flow */
 
 import type Watcher from './watcher'
@@ -30,12 +38,14 @@ export default class Dep {
 
   depend () {
     if (Dep.target) {
+      console.log('这是dep.depend()中的this',this)
       Dep.target.addDep(this)
     }
   }
 
   notify () {
     // stabilize the subscriber list first
+    // subs中存放当前dep存放的所有watcher
     const subs = this.subs.slice()
     if (process.env.NODE_ENV !== 'production' && !config.async) {
       // subs aren't sorted in scheduler if not running async
@@ -43,6 +53,7 @@ export default class Dep {
       // order
       subs.sort((a, b) => a.id - b.id)
     }
+    //循环当前dep收集的所有watcher，update
     for (let i = 0, l = subs.length; i < l; i++) {
       subs[i].update()
     }

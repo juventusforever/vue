@@ -4634,20 +4634,171 @@
     get: noop,
     set: noop
   };
-
+  // 将key代理到vue实例上,使用this.key访问props
   function proxy (target, sourceKey, key) {
+    // getter
     sharedPropertyDefinition.get = function proxyGetter () {
+      // this._props.key
+      console.log('打印一下proxy里面的this看一看', this);
       return this[sourceKey][key]
     };
+    // setter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     sharedPropertyDefinition.set = function proxySetter (val) {
       this[sourceKey][key] = val;
     };
+    // 拦截对this.key 的访问，指向getter和setter
     Object.defineProperty(target, key, sharedPropertyDefinition);
   }
 
+
+  // 响应式原理入口
   function initState (vm) {
     vm._watchers = [];
     var opts = vm.$options;
+    // 对props配置做响应式处理
+    // 将props上的key代理到vue实例上
     if (opts.props) { initProps(vm, opts.props); }
     if (opts.methods) { initMethods(vm, opts.methods); }
     if (opts.data) {
@@ -4662,6 +4813,7 @@
   }
 
   function initProps (vm, propsOptions) {
+    // 获取props的数据
     var propsData = vm.$options.propsData || {};
     var props = vm._props = {};
     // cache prop keys so that future props updates can iterate using Array
@@ -4669,6 +4821,8 @@
     var keys = vm.$options._propKeys = [];
     var isRoot = !vm.$parent;
     // root instance props should be converted
+
+    // 如果是根组件，没有父组件，不需要props，不收集props
     if (!isRoot) {
       toggleObserving(false);
     }
@@ -4700,6 +4854,9 @@
       // static props are already proxied on the component's prototype
       // during Vue.extend(). We only need to proxy props defined at
       // instantiation here.
+
+
+      // 将propkey代理到vue实例上，用this.propkey访问
       if (!(key in vm)) {
         proxy(vm, "_props", key);
       }
@@ -4970,7 +5127,7 @@
   /*  */
 
   var uid$3 = 0;
-
+  console.log('init');
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
       var vm = this;
@@ -5085,6 +5242,7 @@
   }
 
   function Vue (options) {
+    console.log('product',"development");
     if (!(this instanceof Vue)
     ) {
       warn('Vue is a constructor and should be called with the `new` keyword');
@@ -7620,7 +7778,9 @@
     }
     var on = vnode.data.on || {};
     var oldOn = oldVnode.data.on || {};
-    target$1 = vnode.elm;
+    // vnode is empty when removing all listeners,
+    // and use old vnode dom element
+    target$1 = vnode.elm || oldVnode.elm;
     normalizeEvents(on);
     updateListeners(on, oldOn, add$1, remove$2, createOnceHandler$1, vnode.context);
     target$1 = undefined;
@@ -7628,7 +7788,8 @@
 
   var events = {
     create: updateDOMListeners,
-    update: updateDOMListeners
+    update: updateDOMListeners,
+    destroy: function (vnode) { return updateDOMListeners(vnode, emptyNode); }
   };
 
   /*  */
@@ -9180,7 +9341,7 @@
       }
     }
     if (staticClass) {
-      el.staticClass = JSON.stringify(staticClass);
+      el.staticClass = JSON.stringify(staticClass.replace(/\s+/g, ' ').trim());
     }
     var classBinding = getBindingAttr(el, 'class', false /* getStatic */);
     if (classBinding) {
@@ -12012,3 +12173,4 @@
   return Vue;
 
 }));
+//# sourceMappingURL=vue.js.map

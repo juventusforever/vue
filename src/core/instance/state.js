@@ -35,20 +35,171 @@ const sharedPropertyDefinition = {
   get: noop,
   set: noop
 }
-
+// 将key代理到vue实例上,使用this.key访问props
 export function proxy (target: Object, sourceKey: string, key: string) {
+  // getter
   sharedPropertyDefinition.get = function proxyGetter () {
+    // this._props.key
+    console.log('打印一下proxy里面的this看一看', this)
     return this[sourceKey][key]
   }
+  // setter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
+  // 拦截对this.key 的访问，指向getter和setter
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+
+// 响应式原理入口
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
+  // 对props配置做响应式处理
+  // 将props上的key代理到vue实例上
   if (opts.props) initProps(vm, opts.props)
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
@@ -63,6 +214,7 @@ export function initState (vm: Component) {
 }
 
 function initProps (vm: Component, propsOptions: Object) {
+  // 获取props的数据
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
@@ -70,6 +222,8 @@ function initProps (vm: Component, propsOptions: Object) {
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
+
+  // 如果是根组件，没有父组件，不需要props，不收集props
   if (!isRoot) {
     toggleObserving(false)
   }
@@ -98,11 +252,15 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 对props数据做响应式处理
       defineReactive(props, key, value)
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+
+
+    // 将propkey代理到vue实例上，用this.propkey访问
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
@@ -273,12 +431,14 @@ function initMethods (vm: Component, methods: Object) {
           vm
         )
       }
+      // 检测methods的key是否和props中的key冲突，props优先级更高
       if (props && hasOwn(props, key)) {
         warn(
           `Method "${key}" has already been defined as a prop.`,
           vm
         )
       }
+       // 检测methods的key是否和vue实例的key冲突，key是否以合法字符开头
       if ((key in vm) && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +
@@ -286,6 +446,8 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
+    // 将mthods代理到vm实例上，通过this.key访问方法
+    // noop,意为无操作，传入空字符串，以免返回undefined,避免 is not a function错误
     vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
   }
 }

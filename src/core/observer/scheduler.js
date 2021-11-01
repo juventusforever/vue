@@ -70,6 +70,7 @@ if (inBrowser && !isIE) {
  */
 function flushSchedulerQueue () {
   currentFlushTimestamp = getNow()
+  // flushing代表当前队列刷新中
   flushing = true
   let watcher, id
 
@@ -163,13 +164,17 @@ function callActivatedHooks (queue) {
  */
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
+  // 判重，watcher不会重复入队
   if (has[id] == null) {
     has[id] = true
     if (!flushing) {
+      // flushing为false表示当前队列没有被刷新，直接入队
       queue.push(watcher)
     } else {
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.
+      // watcher 队列已刷新，需要特殊操作
+      // watcher 队列是按从小到大排列的，需要塞入到正确的地方
       let i = queue.length - 1
       while (i > index && queue[i].id > watcher.id) {
         i--
@@ -178,8 +183,9 @@ export function queueWatcher (watcher: Watcher) {
     }
     // queue the flush
     if (!waiting) {
+      // waiting为false代表当前浏览器异步队列里没有flushflushSchedulerQueue,队列可以进行插入操作
       waiting = true
-
+      // 非生产环境下，直接同步执行刷新watcher队列，效率较低
       if (process.env.NODE_ENV !== 'production' && !config.async) {
         flushSchedulerQueue()
         return
