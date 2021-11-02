@@ -165,10 +165,16 @@ export default class Watcher {
   update () {
     /* istanbul ignore else */
     if (this.lazy) {
+      // lasy为懒执行，例如computed
+      // dirty置true，组件更新之后响应式数据再度更新时候，执行computed的getter
+      // 重新执行computed的回调函数，计算新值，把值保存到watcher.value中
       this.dirty = true
     } else if (this.sync) {
+      // 同步执行
+      // 例如 this.$watcher 或者watch配置项传递一个 ｛ sync: true ｝
       this.run()
     } else {
+      // 最常用，将当前watcher放入watcher队列
       queueWatcher(this)
     }
   }

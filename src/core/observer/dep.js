@@ -1,11 +1,3 @@
-/*
- * 作者 WuJielin
- * 最后修改 WuJielin
- * 创建时间 2021-10-13 17:39:23
- * 最后修改时间 2021-11-01 11:06:03
- * 说明 
- * 文件路径 \Mase:\WJL\Project\vuejs\vue\src\core\observer\dep.js
- */
 /* @flow */
 
 import type Watcher from './watcher'
@@ -66,6 +58,7 @@ export default class Dep {
 Dep.target = null
 const targetStack = []
 
+// target为空时候，则为初次加载，不进行收集
 export function pushTarget (target: ?Watcher) {
   targetStack.push(target)
   Dep.target = target

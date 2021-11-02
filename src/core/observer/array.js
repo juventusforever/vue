@@ -32,6 +32,7 @@ methodsToPatch.forEach(function (method) {
     const result = original.apply(this, args)
     // this指向数组
     const ob = this.__ob__
+    // 定义inserted，判断method是否为push、unshift、splice，并对参数进行处理传参
     let inserted
     switch (method) {
       case 'push':

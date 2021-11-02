@@ -74,6 +74,10 @@ function flushSchedulerQueue () {
   flushing = true
   let watcher, id
 
+  // 必须保证父组件watcher id 在子组件watcher id之前，父组件先刷新，再刷新子组件，避免子组件刷新执行两次
+  // （父组件刷新时，子组件也会刷新）
+
+
   // Sort queue before flush.
   // This ensures that:
   // 1. Components are updated from parent to child. (because parent is always
@@ -86,12 +90,15 @@ function flushSchedulerQueue () {
 
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
+  // 什么不缓存quene.length,因为quene可能再一直加入新watcher
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
+    // 如果watch的配置项有before配置项，先执行
     if (watcher.before) {
       watcher.before()
     }
     id = watcher.id
+    //清空缓存，代表当前id的watcher已经被执行
     has[id] = null
     watcher.run()
     // in dev build, check and stop circular updates.

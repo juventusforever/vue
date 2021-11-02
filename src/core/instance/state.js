@@ -312,6 +312,7 @@ function initData (vm: Component) {
 
 export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
+  // 第一次加载data的时候target为空，不进行收集
   pushTarget()
   try {
     return data.call(vm, vm)
